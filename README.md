@@ -356,3 +356,65 @@
         +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
         1 row in set (0.01 sec)
 
+
+##  адача 4
+
+
+        root@2a212bfab9b3:/etc/mysql# dir
+        conf.d  my.cnf  my.cnf.fallback
+        root@2a212bfab9b3:/etc/mysql# cat my.cnf
+        # Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
+        #
+        # This program is free software; you can redistribute it and/or modify
+        # it under the terms of the GNU General Public License as published by
+        # the Free Software Foundation; version 2 of the License.
+        #
+        # This program is distributed in the hope that it will be useful,
+        # but WITHOUT ANY WARRANTY; without even the implied warranty of
+        # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        # GNU General Public License for more details.
+        #
+        # You should have received a copy of the GNU General Public License
+        # along with this program; if not, write to the Free Software
+        # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+        
+        #
+        # The MySQL  Server configuration file.
+        #
+        # For explanations see
+        # http://dev.mysql.com/doc/mysql/en/server-system-variables.html
+        
+        [mysqld]
+        pid-file        = /var/run/mysqld/mysqld.pid
+        socket          = /var/run/mysqld/mysqld.sock
+        datadir         = /var/lib/mysql
+        secure-file-priv= NULL
+        
+        # Custom config should go here
+        !includedir /etc/mysql/conf.d/
+        root@2a212bfab9b3:/etc/mysql#
+
+Добавление в конфигурационный файл:
+
+        innodb_flush_log_at_trx_commit = 2
+ - Скорость IO важнее сохранности данных
+
+        innodb_file_per_table = 1
+ - Включение данного параметра требуется в случаях необходимости:
+     . освобождения места на диске при удалении таблиц (общий файл
+        может только увеличиваться)
+     . компрессии таблиц для экономии места на диске
+
+        innodb_log_buffer_size = 1M
+ - Размер буффера с незакомиченными транзакциями 1 Мб
+
+        innodb_buffer_pool_size = 40G примерно 30% от хостовой машины
+ - Буффер кеширования 30% от ОЗУ
+
+
+        innodb_log_file_size = 100 M
+ - Размер файла логов операций 100 Мб
+
+
+
+
