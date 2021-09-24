@@ -264,4 +264,95 @@
 
 ##  Задача 3
 
+        mysql> show profiles;
+        Empty set, 1 warning (0.03 sec)
+        
+        mysql> SET profiling = 1
+           -> ;
+        Query OK, 0 rows affected, 1 warning (0.02 sec)
+        
+        mysql> show profiles;
+        Empty set, 1 warning (0.02 sec)
+
+        
+        mysql> show engines;
+        +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+        | Engine             | Support | Comment                                                        | Transactions | XA   | Savepoints |
+        +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+        | FEDERATED          | NO      | Federated MySQL storage engine                                 | NULL         | NULL | NULL       |
+        | MEMORY             | YES     | Hash based, stored in memory, useful for temporary tables      | NO           | NO   | NO         |
+        | InnoDB             | DEFAULT | Supports transactions, row-level locking, and foreign keys     | YES          | YES  | YES        |
+        | PERFORMANCE_SCHEMA | YES     | Performance Schema                                             | NO           | NO   | NO         |
+        | MyISAM             | YES     | MyISAM storage engine                                          | NO           | NO   | NO         |
+        | MRG_MYISAM         | YES     | Collection of identical MyISAM tables                          | NO           | NO   | NO         |
+        | BLACKHOLE          | YES     | /dev/null storage engine (anything you write to it disappears) | NO           | NO   | NO         |
+        | CSV                | YES     | CSV storage engine                                             | NO           | NO   | NO         |
+        | ARCHIVE            | YES     | Archive storage engine                                         | NO           | NO   | NO         |
+        +--------------------+---------+----------------------------------------------------------------+--------------+------+------------+
+        9 rows in set (0.05 sec)
+
+По умолчинию в БД test_db используется InnoDB
+
+
+        mysql> show table status;
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | Name   | Engine | Version | Row_format | Rows | Avg_row_length | Data_length | Max_data_length | Index_length | Data_free | Auto_increment | Create_time         |            Update_time         | Check_time | Collation          | Checksum | Create_options | Comment |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | orders | InnoDB |      10 | Dynamic    |    5 |           3276 |       16384 |               0 |            0 |         0 |              6 | 2021-09-23 16:20:55 |            2021-09-23 16:20:55 | NULL       | utf8mb4_0900_ai_ci |     NULL |                |         |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        1 row in set (0.21 sec)
+
+
+Смена engine и отработка команд:
+
+        mysql> ALTER TABLE orders engine=MyISAM;
+        Query OK, 5 rows affected (0.42 sec)
+        Records: 5  Duplicates: 0  Warnings: 0
+        
+        
+        mysql> show table status;
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | Name   | Engine | Version | Row_format | Rows | Avg_row_length | Data_length | Max_data_length | Index_length | Data_free | Auto_increment | Create_time         |            Update_time         | Check_time | Collation          | Checksum | Create_options | Comment |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | orders | MyISAM |      10 | Dynamic    |    5 |           3276 |       16384 |               0 |            0 |         0 |              6 | 2021-09-24 06:07:08 |        2021-09-23 16:20:55 | NULL       | utf8mb4_0900_ai_ci |     NULL |                |         |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        1 row in set (0.01 sec)
+        mysql> show profiles;
+        +----------+------------+----------------------------------+
+        | Query_ID | Duration   | Query                            |
+        +----------+------------+----------------------------------+
+        |        1 | 0.05327150 | show engines                     |
+        |        2 | 0.20050525 | show table status                |
+        |        3 | 0.00414100 | alter table orders type = MyISAM |
+        |        4 | 0.00386075 | ALTER TABLE orders TYPE=MyISAM   |
+        |        5 | 0.42798200 | ALTER TABLE orders engine=MyISAM |
+        |        6 | 0.00871600 | show table status                |
+        +----------+------------+----------------------------------+
+        6 rows in set, 1 warning (0.00 sec)
+        
+        mysql> ALTER TABLE orders engine=InnoDB;
+        Query OK, 5 rows affected (0.23 sec)
+        Records: 5  Duplicates: 0  Warnings: 0
+        
+        mysql> show profiles;
+        +----------+------------+----------------------------------+
+        | Query_ID | Duration   | Query                            |
+        +----------+------------+----------------------------------+
+        |        1 | 0.05327150 | show engines                     |
+        |        2 | 0.20050525 | show table status                |
+        |        3 | 0.00414100 | alter table orders type = MyISAM |
+        |        4 | 0.00386075 | ALTER TABLE orders TYPE=MyISAM   |
+        |        5 | 0.42798200 | ALTER TABLE orders engine=MyISAM |
+        |        6 | 0.00871600 | show table status                |
+        |        7 | 0.23380275 | ALTER TABLE orders engine=InnoDB |
+        +----------+------------+----------------------------------+
+        7 rows in set, 1 warning (0.00 sec)
+        
+        mysql> show table status;
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | Name   | Engine | Version | Row_format | Rows | Avg_row_length | Data_length | Max_data_length | Index_length | Data_free | Auto_increment | Create_time         |        Update_time         | Check_time | Collation          | Checksum | Create_options | Comment |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        | orders | InnoDB |      10 | Dynamic    |    5 |           3276 |       16384 |               0 |            0 |         0 |              6 | 2021-09-24 06:08:48 |        2021-09-23 16:20:55 | NULL       | utf8mb4_0900_ai_ci |     NULL |                |         |
+        +--------+--------+---------+------------+------+----------------+-------------+-----------------+--------------+-----------+----------------+---------------------+--      -------------------+------------+--------------------+----------+----------------+---------+
+        1 row in set (0.01 sec)
 
