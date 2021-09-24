@@ -199,3 +199,69 @@
 
 
 
+        mysql> show variables like 'default_authentication_plugin';
+        +-------------------------------+-----------------------+
+        | Variable_name                 | Value                 |
+        +-------------------------------+-----------------------+
+        | default_authentication_plugin | caching_sha2_password |
+        +-------------------------------+-----------------------+
+        1 row in set (0.21 sec)
+        CREATE USER 'test'@'%' IDENTIFIED WITH mysql_native_password BY 'test-pass' PASSWORD EXPIRE INTERVAL 180 DAY;
+        
+        mysql> select user,host,plugin from mysql.user;
+        +------------------+-----------+-----------------------+
+        | user             | host      | plugin                |
+        +------------------+-----------+-----------------------+
+        | root             | %         | caching_sha2_password |
+        | test             | %         | mysql_native_password |
+        | mysql.infoschema | localhost | caching_sha2_password |
+        | mysql.session    | localhost | caching_sha2_password |
+        | mysql.sys        | localhost | caching_sha2_password |
+        | root             | localhost | caching_sha2_password |
+        +------------------+-----------+-----------------------+
+        6 rows in set (0.00 sec)
+        
+        mysql> select user,host,password_last_changed,password_lifetime,password_expired from mysql.user;
+        +------------------+-----------+-----------------------+-------------------+------------------+
+        | user             | host      | password_last_changed | password_lifetime | password_expired |
+        +------------------+-----------+-----------------------+-------------------+------------------+
+        | root             | %         | 2021-09-23 15:18:16   |              NULL | N                |
+        | test             | %         | 2021-09-23 18:18:38   |               180 | N                |
+        | mysql.infoschema | localhost | 2021-09-23 15:18:04   |              NULL | N                |
+        | mysql.session    | localhost | 2021-09-23 15:18:04   |              NULL | N                |
+        | mysql.sys        | localhost | 2021-09-23 15:18:04   |              NULL | N                |
+        | root             | localhost | 2021-09-23 15:18:16   |              NULL | N                |
+        +------------------+-----------+-----------------------+-------------------+------------------+
+        6 rows in set (0.00 sec)
+        
+        mysql> select * from Ielect user,host,password_last_changed,password_lifetime,password_expired from mysql.user;
+        +------------------+-----------+-----------+-----------+-------------------+------------------+
+        | USER             | HOST      | ATTRIBUTE |st_changed | password_lifetime | password_expired |
+        +------------------+-----------+-----------+-----------+-------------------+------------------+
+        | root             | %         | NULL      |15:18:16   |              NULL | N                |
+        | test             | %         | NULL      |18:18:38   |               180 | N                |
+        | mysql.infoschema | localhost | NULL      |15:18:04   |              NULL | N                |
+        | mysql.session    | localhost | NULL      |15:18:04   |              NULL | N                |
+        | mysql.sys        | localhost | NULL      |15:18:04   |              NULL | N                |
+        | root             | localhost | NULL      |15:18:16   |              NULL | N                |
+        +------------------+-----------+-----------+-----------+-------------------+------------------+
+        6 rows in set (0.01 sec)
+
+Дать права на select
+
+        mysql> GRANT SELECT ON test_db.* to 'test';
+        Query OK, 0 rows affected (0.07 sec)
+        
+        mysql> show grants for test
+            -> ;
+        +-------------------------------------------+
+        | Grants for test@%                         |
+        +-------------------------------------------+
+        | GRANT USAGE ON *.* TO `test`@`%`          |
+        | GRANT SELECT ON `test_db`.* TO `test`@`%` |
+        +-------------------------------------------+
+        2 rows in set (0.01 sec)
+
+##  Задача 3
+
+
